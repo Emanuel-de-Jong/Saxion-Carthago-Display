@@ -1,0 +1,18 @@
+﻿@inject MessageService _messageService;
+
+@page "/testing/sendmessage"
+
+<h3>SendMessage</h3>
+
+<input placeholder="Message" @bind="Message"/>
+<button @onclick="Send">Send</button>
+
+@code {
+    private string Message;
+
+    private void Send()
+    {
+        _messageService.SendMessage(Message);
+    }
+
+}

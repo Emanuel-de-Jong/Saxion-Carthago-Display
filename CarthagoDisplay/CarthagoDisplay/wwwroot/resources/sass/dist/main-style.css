@@ -1,0 +1,207 @@
+@font-face {
+    font-family: "HelveticaNeue";
+    src: url("../media/HelveticaNeue.ttc");
+}
+
+* {
+    box-sizing: border-box;
+    font-family: "HelveticaNeue";
+    margin: 0;
+}
+
+.admin {
+    background-color: #F1F3F8;
+    display: grid;
+    grid-template-columns: 100px auto;
+    max-height: 100vh;
+    overflow: hidden;
+}
+
+.admin nav {
+    background-color: #181E28;
+    color: #F1F3F8;
+    display: block;
+    height: 100vh;
+    left: 0;
+    padding: 10px;
+    text-align: center;
+    top: 0;
+    width: 100px;
+}
+
+.admin nav h1 {
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+.admin .tools {
+    background-color: #FFFF;
+    border-radius: 10px;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.342);
+    box-sizing: border-box;
+    margin: 80px;
+    max-height: 100%;
+    max-width: 100%;
+}
+
+body #component-container > div { padding: 10px; }
+
+body .component-container {
+    display: grid;
+    grid-gap: 20px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    height: 100vh;
+    left: 0;
+    padding: 75px;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 2;
+}
+
+body .component-container > div {
+    background-color: rgba(255, 255, 255, 0);
+    border: 3px white;
+    border: 5px white;
+    box-sizing: border-box;
+    height: 100%;
+    position: relative;
+    width: 100%;
+    z-index: -1;
+}
+
+body .component-container > div > h2 {
+    display: block;
+    margin-top: 10px;
+}
+
+body .component-container > div #dateTime {
+    color: white;
+    height: 100%;
+    text-align: center;
+    width: 100%;
+}
+
+body .component-container > div #dateTime #clock {
+    display: block;
+    font-size: 7vw;
+}
+
+body .component-container > div #dateTime #date {
+    display: block;
+    font-size: 2vw;
+}
+
+body .container-3 {
+    display: grid;
+    grid-gap: 20px;
+    grid-template-columns: auto auto auto auto;
+    height: 432px;
+    position: relative;
+    width: 768px;
+    z-index: 2;
+}
+
+body .container-3 > div {
+    background-color: rgba(0, 0, 0, 0.418);
+    border: 3px white;
+    height: 100%;
+    max-width: 100%;
+    min-width: 20px;
+    position: relative;
+    width: 100% !important;
+    width: 100%;
+    z-index: -1;
+}
+
+body .container-3 > div:hover {
+    background-color: rgba(105, 236, 253, 0.589);
+    z-index: 100;
+}
+
+body .container-3 > div.active { background-color: rgba(105, 253, 125, 0.589); }
+
+body .modal-body .container-3 {
+    height: 100%;
+    width: 100%;
+}
+
+body .ComponentSelector-Container { display: flex; }
+
+body .ComponentSelector-Container .component-settings { padding: 20px; }
+
+body .title-container {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    position: fixed;
+    text-align: center;
+    width: 100vw;
+}
+
+body .title-container .song-title {
+    color: white;
+    display: block;
+    font-size: 10vw;
+    text-align: center;
+    text-shadow: 5px 5px 15px rgba(0, 0, 0, 0.342);
+}
+
+body .title-container .song-title .artist {
+    display: block;
+    font-size: 30px;
+    position: absolute;
+    text-align: left;
+}
+
+body .bg {
+    background-image: url("../media/default-bg.png");
+    height: 100vh;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100vw;
+    z-index: -1;
+}
+
+body .bg > div {
+    background-color: white;
+    height: 100px;
+    position: fixed;
+    width: 300px;
+    z-index: 100;
+}
+
+body .bg .left {
+    bottom: -50px;
+    box-shadow: 5px -5px 15px rgba(0, 0, 0, 0.685);
+    left: -100px;
+    transform: rotate(45deg);
+    z-index: 100;
+}
+
+body .bg .right {
+    box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.685);
+    right: -100px;
+    top: -50px;
+    transform: rotate(45deg);
+    z-index: 100;
+}
+
+body .modal.modal-fullscreen .modal-dialog {
+    height: 100vh;
+    margin: 0;
+    max-width: none;
+    padding: 0;
+    width: 100vw;
+}
+
+body .modal.modal-fullscreen .modal-content {
+    border: none;
+    border-radius: 0;
+    height: auto;
+    height: 100vh;
+}
+
+body .modal.modal-fullscreen .modal-body { overflow-y: auto; }

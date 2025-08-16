@@ -1,0 +1,71 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@inject IOptions<ConnectionStrings> _options;
+
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="Calander Owner Email" @bind="_outLookEventSettings.calanderOwnerEmail"/>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="Calander Name" @bind="_outLookEventSettings.calanderName"/>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="Borrel Event Name" @bind="_outLookEventSettings.BorrelEventName"/>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col form-group">
+        <button class="btn btn-primary" @onclick="Save">Opslaan</button>
+    </div>
+</div>
+
+
+@code {
+    private OutlookEventsSettings _outLookEventSettings;
+    private ApplicationDbContext _context;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _outLookEventSettings = _context.EventsSettings.Find(1) ?? new OutlookEventsSettings();
+        ;
+
+        await _context.DisposeAsync();
+    }
+
+    private async void Save()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+        var oldOutlookEventsSettings = await _context.EventsSettings.AsNoTracking().FirstOrDefaultAsync(T => T.Id == 1);
+
+        if (oldOutlookEventsSettings == null)
+        {
+            _outLookEventSettings.calanderID = OutlookApiService.GetCalanderId(_outLookEventSettings.calanderName, _outLookEventSettings.calanderOwnerEmail, _context.OutLookApiSettings.Find(1));
+
+            _context.EventsSettings.Add(_outLookEventSettings);
+        }
+        else
+        {
+            oldOutlookEventsSettings = _outLookEventSettings;
+            oldOutlookEventsSettings.calanderID = OutlookApiService.GetCalanderId(_outLookEventSettings.calanderName, _outLookEventSettings.calanderOwnerEmail, _context.OutLookApiSettings.Find(1));
+            _context.EventsSettings.Update(oldOutlookEventsSettings);
+        }
+        await _context.SaveChangesAsync();
+        await _context.DisposeAsync();
+        StateHasChanged();
+    }
+
+}

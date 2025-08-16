@@ -1,0 +1,55 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using Blazored.SessionStorage
+@inject NavigationManager MyNavigationManager
+@inject IOptions<ConnectionStrings> _options;
+@inject ISessionStorageService sessionStorage;
+
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="Slide Time (seconds)" @bind="_mainSettings.SlideTime"/>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col form-group">
+        <button class="btn btn-primary" @onclick="Save">Opslaan</button>
+    </div>
+</div>
+
+@code {
+    private ApplicationDbContext _context;
+    private MainSettingsDB _mainSettings;
+
+    protected override Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _mainSettings = _context.MainSettings.Find(1) ?? new MainSettingsDB();
+        return Task.CompletedTask;
+    }
+
+    private async void Save()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+        var oldMainSettings = await _context.MainSettings.AsNoTracking().FirstOrDefaultAsync(T => T.Id == 1);
+        if (oldMainSettings == null)
+        {
+            _context.MainSettings.Add(_mainSettings);
+        }
+        else
+        {
+            _context.MainSettings.Update(_mainSettings);
+        }
+        await _context.SaveChangesAsync();
+        await _context.DisposeAsync();
+        StateHasChanged();
+    }
+
+}

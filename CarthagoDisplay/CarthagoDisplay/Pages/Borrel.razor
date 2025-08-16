@@ -1,0 +1,34 @@
+﻿@using Microsoft.Extensions.Options
+@using QRCoder
+<div class="borrel">
+    <h3>HET IS BORREL TIJD!</h3>
+    <img style="max-width: 200px;" src="@($"data:image/png;base64,{_qrCode}")"/>
+</div>
+
+<div class="bg">
+    <div class="left"></div>
+    <div class="right"></div>
+</div>
+@inject IOptions<ConnectionStrings> _options;
+
+@code {
+    private ApplicationDbContext _context;
+    private string _playlistUrl;
+    private string _qrCode;
+
+    protected override Task OnInitializedAsync()
+    {
+        _playlistUrl = SpotifyApiService.CreatePlaylist(_options);
+        _qrCode = GetQrCode(_playlistUrl);
+        return Task.CompletedTask;
+    }
+
+    private string GetQrCode(string url)
+    {
+        var qrGenerator = new QRCodeGenerator();
+        var qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
+        var qrCode = new Base64QRCode(qrCodeData);
+        return qrCode.GetGraphic(20);
+    }
+
+}

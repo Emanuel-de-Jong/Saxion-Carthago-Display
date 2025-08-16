@@ -1,0 +1,12 @@
+﻿<AuthorizeView>
+    <Authorized>
+        <a href="Identity/Account/Manage">Hallo, @context.User.Identity.Name!</a>
+        <form method="post" action="Identity/Account/LogOut">
+            <button type="submit" class="nav-link btn btn-link">Log uit</button>
+        </form>
+    </Authorized>
+    <NotAuthorized>
+        <a class="carthago-green" href="Identity/Account/Register">Registreren</a>
+        <a class="carthago-green" href="Identity/Account/Login">Inloggen</a>
+    </NotAuthorized>
+</AuthorizeView>

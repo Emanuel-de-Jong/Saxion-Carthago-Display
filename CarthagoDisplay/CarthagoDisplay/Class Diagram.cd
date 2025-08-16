@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="CarthagoDisplay.Components.EditorComponent" BaseTypeListCollapsed="true">
+    <Position X="4" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAACAAAAACAEAAAAAAAAAAAAAACAAEAAAAIAAABAAAA=</HashCode>
+      <FileName>Components\EditorComponent.razor.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="CarthagoDisplay.Data.APIResponseModels.ApiCalandersResponseRoot">
+    <Position X="2.75" Y="20.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Data\APIResponseModels\ApiCalandersResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.APIResponseModels.ApiCalandersResponse">
+    <Position X="0.5" Y="20.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\APIResponseModels\ApiCalandersResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.APIResponseModels.ApiEventsResponseRoot">
+    <Position X="6.75" Y="14" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Data\APIResponseModels\ApiEventsResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.APIResponseModels.ApiEventsResponse">
+    <Position X="4.75" Y="14" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAAACAAAAAAAgAIAAAAAAAAAAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>Data\APIResponseModels\ApiEventsResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.APIResponseModels.EventDate">
+    <Position X="2.25" Y="17" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\APIResponseModels\ApiEventsResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.APIResponseModels.OutlookAPITokenResponse">
+    <Position X="6.25" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIACAAAAAAAA=</HashCode>
+      <FileName>Data\APIResponseModels\OutlookAPITokenResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.APIResponseModels.SpotifyApiPlaylistResponse">
+    <Position X="0.5" Y="26.5" Width="2.25" />
+    <NestedTypes>
+      <Class Name="CarthagoDisplay.Data.APIResponseModels.SpotifyApiPlaylistResponse.ExternalUrls" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Data\APIResponseModels\SpotifyApiPlaylistResponse.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAACAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\APIResponseModels\SpotifyApiPlaylistResponse.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.APIResponseModels.SpotifyApiPlaylistResquest">
+    <Position X="3" Y="26.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAAAAAAAAIAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\APIResponseModels\SpotifyApiPlaylistResquest.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.APIResponseModels.SpotifyApiToken">
+    <Position X="4.25" Y="24.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAACAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAABIAAAA=</HashCode>
+      <FileName>Data\APIResponseModels\SpotifyApiToken.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.SettingsModels.OutLookApiSettings">
+    <Position X="4.25" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACgAAABAQAAAAAgAAAAAAAAAgAAAAAAAAAAAAEAAA=</HashCode>
+      <FileName>Data\SettingsModels\OutLookApiSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.SettingsModels.OutlookEventsSettings">
+    <Position X="0.5" Y="14" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAIAAAAAEQAAAAAAAAQAAAA=</HashCode>
+      <FileName>Data\SettingsModels\OutlookEventsSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.SettingsModels.SpotifyApiSettings">
+    <Position X="2.25" Y="24.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAIAAAAAAgAAAAAAAAgABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\SettingsModels\SpotifyApiSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.Component">
+    <Position X="0.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACBAAAAAAQAAAAAAAAAAQAAAAABAAACBAAAAAAAAA=</HashCode>
+      <FileName>Data\Component.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.Event">
+    <Position X="0.5" Y="17" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAICAAAAACAAAAAAAAAAAAQAAAAAAAAAAAAEAAAAAAA=</HashCode>
+      <FileName>Data\Event.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.Page">
+    <Position X="2.25" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAgAAAAAAAEACAAAAAAAAAAAAAAAAABEgAAAAAgA=</HashCode>
+      <FileName>Data\Page.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.PageComponent">
+    <Position X="0.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACgAAAAAAQAAAAAAAAAAAAAAAAAAAAAABACAAAAAA=</HashCode>
+      <FileName>Data\PageComponent.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.Room">
+    <Position X="0.5" Y="30.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAABCAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Room.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.RoomsRoot">
+    <Position X="2.25" Y="30.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Room.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.AvailabilityResponse">
+    <Position X="0.5" Y="32" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAABAAAAAAAAAAAAAAABAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Room.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Data.AvailabilityResponseRoot">
+    <Position X="2.5" Y="32" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Room.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Pages.Admin.ApiSettings.EventsSettingModel">
+    <Position X="2.75" Y="14" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>IAAAAACAAAAABAAgAAAAAAAAAAAAAAAAAAAEAAAAAAA=</HashCode>
+      <FileName>Pages\Admin\ApiSettings\Events.cshtml.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Pages.Admin.ApiSettings.OutlookApiModel">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAAABAAgAAAAAAAAAAAAAAAAABAEAAAAAAA=</HashCode>
+      <FileName>Pages\Admin\ApiSettings\Outlook.cshtml.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Services.OutlookApiService">
+    <Position X="2.25" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAAAAAAAACAAAAAAAAACAAAAEAEAAAACAA=</HashCode>
+      <FileName>Services\OutlookApiService.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CarthagoDisplay.Services.SpotifyApiService">
+    <Position X="0.5" Y="24.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAFAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAACAAAA=</HashCode>
+      <FileName>Services\SpotifyApiService.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="CarthagoDisplay.Data.ComponentType">
+    <Position X="2.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAAAAAAAAAAAACAgAAAAAAAAAAAABQAAA=</HashCode>
+      <FileName>Data\Component.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

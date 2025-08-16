@@ -1,0 +1,149 @@
+﻿@inject IOptions<ConnectionStrings> _options;
+@inject MessageService _messageService;
+
+@page "/"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+
+<h1 class="mb-3">Slides</h1>
+
+<div class="slides-containter">
+    @if (_slides != null)
+    {
+        <ul ondragover="event.preventDefault();" class="list-group mb-3">
+            @foreach (var item in _slides)
+            {
+                <li draggable="true" @key="item.Index" class="list-group-item" aria-current="true" @ondrop="@(() => Drop(item))" @ondrag="@(() => StartDrag(item))">
+                    @item.Title
+                    @if (item.Id != 0)
+                    {
+                        <a href="/slides/@item.Id">
+                            <span class="oi oi-chevron-right float-right pt-1 carthago-green"></span>
+                        </a>
+                    }
+                    <a @onclick="@(() => RemoveSlide(item))">
+                        <span class="oi oi-circle-x float-right cursor-hand pr-2 pt-1"></span>
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+    <div class="row">
+        <div class="col-auto">
+            <input class="form-control" placeholder="Slide title" @bind="_newSlideTitle" required/>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary mb-3" @onclick="AddSlide">Toevoegen</button>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary mb-3" @onclick="Save">Opslaan</button>
+        </div>
+    </div>
+
+</div>
+
+@code {
+
+    private string _newSlideTitle;
+    private int _currentIndex;
+
+    private List<Slide> _slides;
+    private ApplicationDbContext _context;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _slides = await _context.Slides.OrderBy(a => a.Index).ToListAsync();
+        await _context.DisposeAsync();
+        _messageService.OnMessage += MessageHandler;
+    }
+
+    private void AddSlide()
+    {
+        if (!string.IsNullOrWhiteSpace(_newSlideTitle))
+        {
+            _slides.Add(new Slide {Title = _newSlideTitle, Index = _slides.Count()});
+            _newSlideTitle = string.Empty;
+        }
+    }
+
+    private void RemoveSlide(Slide item)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        var slide = _context.Slides.FirstOrDefault(s => s.Id == item.Id);
+        if (slide != null)
+        {
+            _context.Slides.Remove(slide);
+        }
+
+        _context.SaveChanges();
+        _context.Dispose();
+
+        _slides.Remove(item);
+        UpdateIndexes();
+    }
+
+    private void StartDrag(Slide item)
+    {
+        _currentIndex = GetIndex(item);
+    }
+
+    private void ClickItem(Slide item)
+    {
+        _currentIndex = GetIndex(item);
+    }
+
+    private int GetIndex(Slide item)
+    {
+        return _slides.FindIndex(a => a.Id == item.Id);
+    }
+
+    private void UpdateIndexes()
+    {
+        foreach (var slide in _slides) slide.Index = GetIndex(slide);
+    }
+
+    private void Drop(Slide item)
+    {
+        if (item == null) return;
+    // get index of the item that is dropped upon.
+        var index = GetIndex(item);
+    // get current dropped item
+        var current = _slides[_currentIndex];
+    // remove slide from current index
+        _slides.RemoveAt(_currentIndex);
+    // and insert in iets new pos
+        _slides.Insert(index, current);
+        UpdateIndexes();
+    }
+
+    private void Save()
+    {
+        _messageService.SendMessage("Save");
+    }
+
+    private async void MessageHandler(string message)
+    {
+        if (message == "Save")
+        {
+            await InvokeAsync(async () =>
+            {
+                var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+                optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+                _context = new ApplicationDbContext(optionsBuilder.Options);
+
+                _context.Slides.UpdateRange(_slides);
+                await _context.SaveChangesAsync();
+                await _context.DisposeAsync();
+                StateHasChanged();
+            });
+        }
+    }
+
+}

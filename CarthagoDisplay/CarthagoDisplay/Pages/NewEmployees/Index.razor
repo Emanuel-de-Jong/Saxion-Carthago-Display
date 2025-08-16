@@ -1,0 +1,89 @@
+﻿@page "/newemployees"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@inject IOptions<ConnectionStrings> _options;
+
+@inject IJSRuntime JSRuntime;
+
+<h3>Nieuw werkenemers</h3>
+
+<a class="btn btn-primary" href="/newemployees/add">Toevoegen</a>
+
+<table class="table mt-3">
+    <thead>
+    <tr>
+        <th>
+            Naam
+        </th>
+        <th>
+            In dienst per
+        </th>
+        <th>
+        </th>
+        <th>
+        </th
+    </tr>
+    </thead>
+    <tbody>
+    @if (_employees != null)
+    {
+        @foreach (var employee in _employees)
+        {
+            <tr>
+                <td>
+                    @employee.Name
+                </td>
+                <td>
+                    @employee.InDienstPer.ToString("dd-MM-yy")
+                </td>
+                <td>
+                    <a class="carthago-green" href="/newemployees/edit/@employee.Id">Bijwerken</a>
+                </td>
+                <td>
+                    <a class="carthago-green" href="javascript:;" @onclick="() => DeleteEmployee(employee.Id)">Verwijder</a>
+                </td>
+            </tr>
+        }
+    }
+
+    </tbody>
+    <tfoot></tfoot>
+</table>
+
+<style>
+    th { padding-right: 50px !important; }
+</style>
+
+@code {
+    private List<NewEmployee> _employees;
+    private ApplicationDbContext _context;
+
+    private async void DeleteEmployee(int employeeId)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _context.Remove(_context.Find<NewEmployee>(employeeId));
+
+        await _context.SaveChangesAsync();
+        await _context.DisposeAsync();
+
+        await OnInitializedAsync();
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _employees = await _context.NewEmployees.ToListAsync();
+
+        await _context.DisposeAsync();
+    }
+
+}

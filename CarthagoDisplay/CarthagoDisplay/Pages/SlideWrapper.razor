@@ -1,0 +1,121 @@
+﻿@inject IOptions<ConnectionStrings> _options;
+@inject MessageService _messageService;
+@page "/slides";
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@layout EmptyLayout;
+@inject IJSRuntime JSRuntime
+
+@if (_isBorrelSetup)
+{
+    <SetupBorrel></SetupBorrel>
+}
+else if (_isBorrel)
+{
+    <Borrel></Borrel>
+}
+else if (_isGreeting)
+{
+    <Greeting></Greeting>
+}
+else if (_slides != null)
+{
+    <SlidePage Slide="_slides[_currentSlide]"></SlidePage>
+}
+
+
+
+
+@code {
+
+    private ApplicationDbContext _context;
+    private List<Slide> _slides;
+    private int _currentSlide;
+    private bool _isBorrel;
+    private bool _isBorrelSetup;
+    private bool _isGreeting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+        _slides = await _context.Slides.Include(m => m.SlideComponents).OrderBy(t => t.Index).ToListAsync();
+        _messageService.OnMessage += MessageHandler;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("ResetFlipFlop");
+        }
+    }
+
+
+    private async void MessageHandler(string message)
+    {
+        switch (message)
+        {
+            case "Update_Slide":
+                await InvokeAsync(async () =>
+                {
+                    var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+                    optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+                    _context = new ApplicationDbContext(optionsBuilder.Options);
+
+                    _slides = await _context.Slides.Include(m => m.SlideComponents).OrderBy(t => t.Index).ToListAsync();
+
+                    do
+                    {
+                        _currentSlide = (_currentSlide + 1) % _slides.Count;
+                    } while (_slides[_currentSlide].Disabled);
+
+                    StateHasChanged();
+                });
+                break;
+            case "BORREL_TRUE":
+                await InvokeAsync(() =>
+                {
+                    _isBorrelSetup = false;
+                    _isBorrel = true;
+                    StateHasChanged();
+                });
+                break;
+            case "BORREL_FALSE":
+                await InvokeAsync(() =>
+                {
+                    _isBorrelSetup = false;
+                    _isBorrel = false;
+                    StateHasChanged();
+                });
+                break;
+            case "BORREL_SETUP":
+                await InvokeAsync(() =>
+                {
+                    _isBorrelSetup = true;
+                    StateHasChanged();
+                });
+                break;
+            case "GREETING_TRUE":
+                await InvokeAsync(() =>
+                {
+                    _isGreeting = true;
+                    StateHasChanged();
+                });
+                break;
+            case "GREETING_FALSE":
+                await InvokeAsync(() =>
+                {
+                    _isGreeting = false;
+                    StateHasChanged();
+                });
+                break;
+        }
+    }
+
+
+
+
+}

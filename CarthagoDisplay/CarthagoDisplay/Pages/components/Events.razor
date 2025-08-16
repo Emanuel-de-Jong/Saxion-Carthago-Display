@@ -1,0 +1,187 @@
+﻿@inject MessageService _messageService;
+@inject IOptions<ConnectionStrings> _options;
+@page "/components/events"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+<div class="eventContainer">
+    @if (_eventsPerDay != null)
+    {
+        foreach (var item in _eventsPerDay)
+        {
+            switch (item.Key)
+            {
+                case DayOfWeek.Monday:
+
+                    if (item.Value.Count != 0)
+                    {
+                        <h2>Maandag</h2>
+                        <hr/>
+                    }
+                    foreach (var _event in item.Value)
+                    {
+                        <h5>@_event.Name</h5>
+                        <span>@_event.Start.ToString("dd-MMMM / HH:mm") @_event.Organizer</span>
+                    }
+                    break;
+                case DayOfWeek.Tuesday:
+
+                    if (item.Value.Count != 0)
+                    {
+                        <h2>Dinsdag</h2>
+                        <hr/>
+                    }
+                    foreach (var _event in item.Value)
+                    {
+                        <h5>@_event.Name</h5>
+                        <span>@_event.Start.ToString("dd-MMMM / HH:mm") @_event.Organizer</span>
+                    }
+                    break;
+                case DayOfWeek.Wednesday:
+
+                    if (item.Value.Count != 0)
+                    {
+                        <h2>Woensdag</h2>
+                        <hr/>
+                    }
+
+                    foreach (var _event in item.Value)
+                    {
+                        <h5>@_event.Name</h5>
+                        <span>@_event.Start.ToString("dd-MMMM / HH:mm") @_event.Organizer</span>
+                    }
+                    break;
+                case DayOfWeek.Thursday:
+
+                    if (item.Value.Count != 0)
+                    {
+                        <h2>Donderdag</h2>
+                        <hr/>
+                    }
+                    foreach (var _event in item.Value)
+                    {
+                        <h5>@_event.Name</h5>
+                        <span>@_event.Start.ToString("dd-MMMM / HH:mm") @_event.Organizer</span>
+                    }
+                    break;
+                case DayOfWeek.Friday:
+
+                    if (item.Value.Count != 0)
+                    {
+                        <h2>Vrijdag</h2>
+                        <hr/>
+                    }
+                    foreach (var _event in item.Value)
+                    {
+                        <h5>@_event.Name</h5>
+
+                        <span>@_event.Start.ToString("dd-MMMM / HH:mm") @_event.Organizer</span>
+                    }
+                    break;
+                case DayOfWeek.Saturday:
+
+                    if (item.Value.Count != 0)
+                    {
+                        <h2>Zaterdag</h2>
+                        <hr/>
+                    }
+                    foreach (var _event in item.Value)
+                    {
+                        <h5>@_event.Name</h5>
+                        <span>@_event.Start.ToString("dd-MMMM / HH:mm") @_event.Organizer</span>
+                    }
+                    break;
+                case DayOfWeek.Sunday:
+                    if (item.Value.Count != 0)
+                    {
+                        <h2>Zondag</h2>
+                        <hr/>
+                    }
+                    foreach (var _event in item.Value)
+                    {
+                        <h5>@_event.Name</h5>
+                        <span>@_event.Start.ToString("dd-MMMM / HH:mm") @_event.Organizer</span>
+                    }
+                    break;
+            }
+        }
+    }
+</div>
+
+
+@code {
+    private List<Event> _events;
+    private ApplicationDbContext _context;
+    private DateTime _lastUpdate;
+    private Dictionary<DayOfWeek, List<Event>> _eventsPerDay;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        InitEventsPerDayList();
+
+        GetEventsPerDay(await _context.Events.ToListAsync());
+        _lastUpdate = DateTime.Now;
+
+        await _context.DisposeAsync();
+        _messageService.OnMessage += MessageHandler;
+    }
+
+    private async void MessageHandler(string message)
+    {
+        if (message == "Update_Events")
+        {
+            await InvokeAsync(async () =>
+            {
+                var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+                optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+                _context = new ApplicationDbContext(optionsBuilder.Options);
+
+                InitEventsPerDayList();
+
+                GetEventsPerDay(await _context.Events.ToListAsync());
+                _lastUpdate = DateTime.Now;
+                await _context.DisposeAsync();
+                StateHasChanged();
+            });
+        }
+    }
+
+    private void GetEventsPerDay(List<Event> events)
+    {
+        foreach (var item in events)
+        {
+            if (_eventsPerDay.Any(T => T.Key == item.Start.DayOfWeek))
+            {
+                _eventsPerDay.GetValueOrDefault(item.Start.DayOfWeek)?.Add(item);
+            }
+            else
+            {
+                var list = new List<Event>();
+                list.Add(item);
+                _eventsPerDay.Add(item.Start.DayOfWeek, list);
+            }
+        }
+    }
+
+    private void InitEventsPerDayList()
+    {
+        _eventsPerDay = new Dictionary<DayOfWeek, List<Event>>();
+        for (var i = 1; i < 8; i++)
+        {
+            if (i == 7)
+            {
+                _eventsPerDay.Add(DayOfWeek.Sunday, new List<Event>());
+            }
+            else
+            {
+                _eventsPerDay.Add((DayOfWeek) i, new List<Event>());
+            }
+        }
+    }
+
+}

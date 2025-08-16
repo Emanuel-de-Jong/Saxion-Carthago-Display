@@ -1,0 +1,78 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using Blazored.SessionStorage
+@inject NavigationManager MyNavigationManager
+@inject IOptions<ConnectionStrings> _options;
+@inject ISessionStorageService sessionStorage;
+
+@if (_message != null)
+{
+    @_message
+}
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="Client ID" @bind="_spotifyApiSettings.ClientID"/>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="Client Secret" @bind="_spotifyApiSettings.ClientSecret"/>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="PlaylistName" @bind="_spotifyApiSettings.PlaylistName"/>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col form-group">
+        <button class="btn btn-primary" @onclick="Save">Opslaan</button>
+    </div>
+</div>
+
+
+@code {
+    private ApplicationDbContext _context;
+    private SpotifyApiSettings _spotifyApiSettings;
+    private string _code;
+    private string _message;
+    private string _state = Guid.NewGuid().ToString();
+
+    protected override Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _spotifyApiSettings = _context.SpotifyApiSettings.Find(1);
+        if (_spotifyApiSettings == null)
+        {
+            _spotifyApiSettings = new SpotifyApiSettings();
+        }
+        return Task.CompletedTask;
+    }
+
+    private async void Save()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+        var oldspotifyApiSettings = await _context.SpotifyApiSettings.AsNoTracking().FirstOrDefaultAsync(T => T.Id == 1);
+        if (oldspotifyApiSettings == null)
+        {
+            _context.SpotifyApiSettings.Add(_spotifyApiSettings);
+        }
+        else
+        {
+            _context.SpotifyApiSettings.Update(_spotifyApiSettings);
+        }
+        await _context.SaveChangesAsync();
+        await _context.DisposeAsync();
+        StateHasChanged();
+    }
+
+}

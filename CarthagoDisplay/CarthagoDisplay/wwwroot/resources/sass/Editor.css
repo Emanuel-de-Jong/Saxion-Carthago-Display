@@ -1,0 +1,10 @@
+﻿.ck.ck-editor {
+    height: 100% !important;
+    width: 100% !important;
+}
+
+.ck .ck-editor__main { height: 100% !important; }
+
+.ck.ck-editor__main > .ck-editor__editable { height: 100% !important; }
+
+.ck.ck-editor__main > .ck-editor__editable:not(.ck-focused) { height: 100% !important; }

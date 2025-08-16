@@ -1,0 +1,52 @@
+﻿@inject IJSRuntime JSRuntime
+
+@inject MessageService _messageService;
+@inject IOptions<ConnectionStrings> _options;
+@page "/components/newemployees"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+
+
+@foreach (var employee in _employees)
+{
+    <div class="employee-container" style="height: 0;">
+        <div class="employee">
+            <div class="user-img">
+                <img src="Uploads/NewEmployee/@employee.Picture" alt="">
+            </div>
+            <div class="employee-data">
+                <div class="name">
+                    <span>Naam:</span>@employee.Name
+                </div>
+                <div class="role">
+                    <span>Rol:</span>@employee.Role
+                </div>
+                <div class="description">
+                    <span>Intro:</span>@employee.Description
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+
+@code {
+    private List<NewEmployee> _employees = new();
+    private ApplicationDbContext _context;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _employees = await _context.NewEmployees.ToListAsync();
+
+        await _context.DisposeAsync();
+        StateHasChanged();
+    }
+
+}

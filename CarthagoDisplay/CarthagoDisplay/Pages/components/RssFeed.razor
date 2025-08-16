@@ -1,0 +1,86 @@
+@using System.ServiceModel.Syndication
+@using System.Xml
+@using QRCoder
+@inject MessageService _messageService;
+@inject IJSRuntime JSRuntime
+<div class="newsContainer">
+    <div class="newFeed">
+        <div class="feed">
+            <h2>@Title</h2>
+            @foreach (var item in _feed.Items.OrderByDescending(T => T.PublishDate))
+            {
+                <div class="feedGrid @string.Format("feedGridId" + Id)" style="height: 0;">
+                    <div class="qr">
+                        <img style="max-width: 150px;"
+                             src="@($"data:image/png;base64,{GetQrCode(item.Links[0].Uri.AbsoluteUri)}")"/>
+                    </div>
+                    <div class="text">
+                        <h3 class="title">@item.Title.Text</h3>
+                        <span class="time">published @item.PublishDate.ToLocalTime().ToString("HH:mm dd-MM-yy ")</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter]
+    public string RssFeedUrl { get; set; }
+
+    [Parameter]
+    public int Id { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
+
+    private SyndicationFeed _feed;
+    private DateTime _lastUpdate;
+
+
+    protected override Task OnInitializedAsync()
+    {
+        _messageService.OnMessage += MessageHandler;
+        using var reader = XmlReader.Create(RssFeedUrl);
+
+
+        _feed = SyndicationFeed.Load(reader);
+        reader.Dispose();
+        _lastUpdate = DateTime.Now;
+        return Task.CompletedTask;
+    }
+
+    private string GetQrCode(string url)
+    {
+        var qrGenerator = new QRCodeGenerator();
+        var qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
+        var qrCode = new Base64QRCode(qrCodeData);
+        return qrCode.GetGraphic(20);
+    }
+
+    private async void MessageHandler(string message)
+    {
+        if (message == "Update_RSS")
+        {
+            await InvokeAsync(() =>
+            {
+                using var reader = XmlReader.Create(RssFeedUrl);
+
+                _feed = SyndicationFeed.Load(reader);
+                reader.Dispose();
+                _lastUpdate = DateTime.Now;
+
+                StateHasChanged();
+            });
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JSRuntime.InvokeVoidAsync("flipFlop", Id);
+    }
+
+
+}

@@ -1,0 +1,18 @@
+﻿@inject IJSRuntime JSRuntime
+
+<span id="dateTime">
+    <span id="clock"></span>
+    <span id="date"></span>
+</span>
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("StartClock");
+        }
+    }
+
+}

@@ -1,0 +1,66 @@
+﻿@page "/api/spotify/callback"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using Blazored.SessionStorage
+@using Microsoft.AspNetCore.WebUtilities
+@inject NavigationManager MyNavigationManager
+@inject IOptions<ConnectionStrings> _options;
+@inject ISessionStorageService sessionStorage;
+@layout EmptyLayout
+
+@inject MessageService _messageService;
+
+
+@if (_message != null)
+{
+    <h2>@_message</h2>
+}
+
+
+@code {
+    private ApplicationDbContext _context;
+    private SpotifyApiSettings _spotifyApiSettings;
+    private string _code;
+    private string _message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _spotifyApiSettings = await _context.SpotifyApiSettings.FindAsync(1);
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var uri = MyNavigationManager.ToAbsoluteUri(MyNavigationManager.Uri);
+            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("error", out var error))
+            {
+                _message = string.Format("A error has occured: " + error);
+            }
+
+            if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("code", out var code))
+            {
+                if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("state", out var state))
+                {
+                    _code = code;
+                    var uri_ = new Uri(MyNavigationManager.Uri);
+
+                    _spotifyApiSettings.RedirectUrl = uri_.GetLeftPart(UriPartial.Path);
+                    SpotifyApiService.GetAccesToken(code, _spotifyApiSettings, _options, false);
+                    _message = "Authorized Succesfully! Have fun!";
+                    _messageService.SendMessage("BORREL_TRUE");
+                    StateHasChanged();
+                }
+            }
+
+            await _context.DisposeAsync();
+        }
+    }
+
+}

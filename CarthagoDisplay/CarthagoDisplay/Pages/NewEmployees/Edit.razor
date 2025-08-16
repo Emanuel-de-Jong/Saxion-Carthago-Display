@@ -1,0 +1,147 @@
+﻿@page "/newemployees/edit/{Id:int}"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Logging
+@using Microsoft.Extensions.Options
+@using Microsoft.AspNetCore.Hosting
+@using System.IO
+@inject ILogger<Add> Logger
+@inject IWebHostEnvironment Environment
+@inject IOptions<ConnectionStrings> _options;
+@inject NavigationManager NavManager
+@inject IJSRuntime JSRuntime;
+
+
+<h3>Bijwerken @Id</h3>
+
+<div class="employee-form">
+    <div class="form-group">
+        <input class="form-control check-valid" placeholder="Naam Medewerker" @bind="_employee.Name" required />
+    </div>
+
+    <div class="form-group">
+        <input class="form-control check-valid" placeholder="Introdutie Title" @bind="_employee.Title" required />
+    </div>
+
+    <div class="form-group">
+        <input class="form-control check-valid" placeholder="Rol" @bind="_employee.Role" required />
+    </div>
+
+    <div class="form-group">
+        <input class="form-control" type="date" @bind="_employee.InDienstPer" />
+    </div>
+
+    <div class="form-group">
+        <img src="@_imgSrc" />
+    </div>
+
+    <div class="form-group">
+        <InputFile OnChange="@LoadFiles" accept="image/png, image/gif, image/jpeg" /><br />
+    </div>
+
+    <div class="form-group">
+        <textarea id="txtArea" rows="10" cols="70" @bind="_employee.Description"></textarea>
+    </div>
+
+    <div class="form-group">
+        <button class="btn btn-primary mb-3" @onclick="Save">Opslaan</button>
+    </div>
+</div>
+
+
+<style>
+    .employee-form {
+        width: 50%;
+    }
+
+    img {
+        max-width: 200px;
+    }
+</style>
+
+
+@code {
+
+    [ParameterAttribute]
+    public int Id { get; set; }
+
+    private string _imgSrc;
+
+    private ApplicationDbContext _context;
+
+    private readonly List<IBrowserFile> _loadedFiles = new();
+    private const long MaxFileSize = 1024 * 1000 * 5;
+    private const int MaxAllowedFiles = 1;
+    private bool _isLoading;
+    private NewEmployee _employee;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _employee = _context.Find<NewEmployee>(Id);
+
+        _imgSrc = "Uploads/NewEmployee/" + _employee.Picture;
+
+        await _context.DisposeAsync();
+    }
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        _isLoading = true;
+        _loadedFiles.Clear();
+
+        foreach (var file in e.GetMultipleFiles(MaxAllowedFiles))
+        {
+            try
+            {
+                _loadedFiles.Add(file);
+
+                var trustedFileNameForFileStorage = Path.GetRandomFileName();
+
+
+                var path = Path.Combine(Environment.ContentRootPath,
+                    Environment.WebRootPath, "Uploads", "NewEmployee",
+                    trustedFileNameForFileStorage + "-" + file.Name);
+
+                _employee.Picture = trustedFileNameForFileStorage + "-" + file.Name;
+
+                await using FileStream fs = new(path, FileMode.Create);
+                await file.OpenReadStream(MaxFileSize).CopyToAsync(fs);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("File: {Filename} Error: {Error}",
+                    file.Name, ex.Message);
+            }
+        }
+
+        _isLoading = false;
+
+        _imgSrc = "Uploads/NewEmployee/" + _employee.Picture;
+    }
+
+    private async void Save()
+    {
+        if (string.IsNullOrEmpty(_employee.Name) ||
+            string.IsNullOrEmpty(_employee.Title) ||
+            string.IsNullOrEmpty(_employee.Role))
+        {
+            await JSRuntime.InvokeVoidAsync("checkValid");
+            return;
+        }
+
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _context.Update(_employee);
+        await _context.SaveChangesAsync();
+        await _context.DisposeAsync();
+        NavManager.NavigateTo("/newemployees");
+    }
+
+}

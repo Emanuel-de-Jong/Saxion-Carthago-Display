@@ -1,0 +1,94 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@inject IOptions<ConnectionStrings> _options;
+@inject MessageService _messageService;
+@inject IJSRuntime JSRuntime;
+
+
+<div id="component-container" class="component-container">
+
+    @foreach (var componentList in Slide.SlideComponents.OrderBy(T => T.GridPosition).ToList())
+    {
+        var component = _context.Components.Find(componentList.ComponentId);
+
+        <div id="@string.Format("box" + componentList.GridPosition)" class="gridBox">
+            @switch (component.ComponentType)
+            {
+                case ComponentType.Rooms:
+                    <Rooms></Rooms>
+                    break;
+                case ComponentType.Events:
+                    <Events></Events>
+                    break;
+                case ComponentType.RSSFeed:
+                    <RssFeed RssFeedUrl="@component.Url" Id="@component.Id"></RssFeed>
+                    break;
+                case ComponentType.Klok:
+                    <Klok></Klok>
+                    break;
+                case ComponentType.Custom:
+                    <Custom Html="@component.Html"></Custom>
+                    break;
+                case ComponentType.NewEmployee:
+                    <NewEmployees></NewEmployees>
+                    break;
+            }
+        </div>
+    }
+
+
+</div>
+@if (string.IsNullOrEmpty(Slide.Background))
+{
+    <div class="bg">
+        <div class="left" style="background-color: @Slide.SecondaryColor;"></div>
+        <div class="right" style="background-color: @Slide.SecondaryColor;"></div>
+    </div>
+}
+else
+{
+    <div class="bg" style="background-image: url('/Uploads/Backgrounds/@Slide.Background')">
+        <div class="left" style="background-color: @Slide.SecondaryColor;"></div>
+        <div class="right" style="background-color: @Slide.SecondaryColor;"></div>
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public Slide Slide { get; set; }
+
+    private ApplicationDbContext _context;
+
+    protected override Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+        return Task.CompletedTask;
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JSRuntime.InvokeVoidAsync("resetVars");
+        await JSRuntime.InvokeVoidAsync("CreateDivs", Slide.SlideComponents.Count);
+        var grids = Slide.Grid.Split("//");
+
+        for (var i = 0; i < grids.Length; i++)
+        {
+            await JSRuntime.InvokeVoidAsync("createGrid", i + 1, grids[i], false);
+        }
+        await JSRuntime.InvokeVoidAsync("removeBoxes");
+
+
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("flipEmployees");
+        }
+    }
+
+
+
+}

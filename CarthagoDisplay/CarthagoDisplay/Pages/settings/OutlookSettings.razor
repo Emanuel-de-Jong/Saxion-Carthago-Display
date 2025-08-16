@@ -1,0 +1,89 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@inject IOptions<ConnectionStrings> _options;
+
+
+<span>
+    <b>Authorized:</b>@_outLookApiSettings.Authorized
+</span>
+
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="Outlok Tenant ID" @bind="_outLookApiSettings.Tenant"/>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="API Client ID" @bind="_outLookApiSettings.ClientId"/>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="API Client Secret" @bind="_outLookApiSettings.ClientSecret"/>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="API Redirect URL" @bind="_outLookApiSettings.RedirectURL"/>
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col">
+        <input class="form-control" placeholder="Admin Email" @bind="_outLookApiSettings.AdminEmail"/>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col form-group">
+        <button class="btn btn-primary" @onclick="Save">Opslaan</button>
+    </div>
+    <div class="col">
+        @if (!_outLookApiSettings.Authorized)
+        {
+            <a href="https://login.microsoftonline.com/@_outLookApiSettings.Tenant/adminconsent?client_id=@_outLookApiSettings.ClientId&redirect_uri=@_outLookApiSettings.RedirectURL" class="btn btn-success" role="button">Authorize</a>
+        }
+    </div>
+</div>
+
+
+@code {
+    private OutLookApiSettings _outLookApiSettings;
+    private ApplicationDbContext _context;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _outLookApiSettings = _context.OutLookApiSettings.Find(1) ?? new OutLookApiSettings();
+
+    //look if the API is autorized
+        _outLookApiSettings.Authorized = OutlookApiService.IsAuthorized(_outLookApiSettings);
+
+        await _context.DisposeAsync();
+    }
+
+    private async void Save()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+        var oldoutLookApiSettings = await _context.OutLookApiSettings.AsNoTracking().FirstOrDefaultAsync(T => T.Id == 1);
+        if (oldoutLookApiSettings == null)
+        {
+            _context.OutLookApiSettings.Add(_outLookApiSettings);
+        }
+        else
+        {
+            _context.OutLookApiSettings.Update(_outLookApiSettings);
+        }
+        await _context.SaveChangesAsync();
+        await _context.DisposeAsync();
+        StateHasChanged();
+    }
+
+}

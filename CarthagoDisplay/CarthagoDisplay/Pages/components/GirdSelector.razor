@@ -1,0 +1,91 @@
+﻿@inject IJSRuntime JSRuntime
+
+
+<div class="container-3 gridSelect">
+    <div class="1" id="1" onclick="selectDiv(this)"></div>
+    <div class="2" id="1" onclick="selectDiv(this)"></div>
+    <div class="3" id="1" onclick="selectDiv(this)"></div>
+    <div class="4" id="1" onclick="selectDiv(this)"></div>
+    <div class="1" id="2" onclick="selectDiv(this)"></div>
+    <div class="2" id="2" onclick="selectDiv(this)"></div>
+    <div class="3" id="2" onclick="selectDiv(this)"></div>
+    <div class="4" id="2" onclick="selectDiv(this)"></div>
+    <div class="1" id="3" onclick="selectDiv(this)"></div>
+    <div class="2" id="3" onclick="selectDiv(this)"></div>
+    <div class="3" id="3" onclick="selectDiv(this)"></div>
+    <div class="4" id="3" onclick="selectDiv(this)"></div>
+</div>
+<div style="padding: 20px;">
+    <div class="row g-1 mb-3">
+        <div class="col-auto">
+            <div class="button-container">
+                <button class="btn btn-primary mb-3 my-auto" @onclick="ConfirmBox">Confirm Box</button>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="button-container">
+                <button class="btn btn-danger mb-3 my-auto" @onclick="ResetGrid">Reset grid</button>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="button-container">
+                <button class="btn btn-primary mb-3 my-auto" data-dismiss="modal" @onclick="ConfirmGrid">Confirm Grid</button>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter]
+    public string Grid { get; set; }
+
+    [Parameter]
+    public EventCallback<string> GridChanged { get; set; }
+
+    [Parameter]
+    public EventCallback confirmGrid { get; set; }
+
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Grid = "";
+        }
+        return Task.CompletedTask;
+    }
+
+
+    private async void ConfirmBox()
+    {
+        var arrays = await JSRuntime.InvokeAsync<string>("makeUsableArray");
+
+        if (string.IsNullOrEmpty(Grid))
+        {
+            Grid = arrays;
+        }
+        else
+        {
+            Grid += "//" + arrays;
+        }
+
+        await GridChanged.InvokeAsync(Grid);
+    }
+
+
+    private async void ConfirmGrid()
+    {
+        await confirmGrid.InvokeAsync();
+        await JSRuntime.InvokeVoidAsync("resetValues");
+    }
+
+    async void ResetGrid()
+    {
+        await JSRuntime.InvokeVoidAsync("resetBoxes");
+    }
+
+}

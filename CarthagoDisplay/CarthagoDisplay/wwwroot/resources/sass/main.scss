@@ -1,0 +1,234 @@
+$shadow: 0px 0px 15px rgba(0,0,0,0.6);
+*{
+    margin:0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.welcome-container{
+    >h1{
+        font-size:5em;
+        color:white;
+        text-shadow: $shadow;
+        display: block;
+        margin:auto;
+        text-align:center;
+    }
+    width:100vw;
+    height:100vh;
+    position:absolute;
+    top:0;
+    left:0;
+    padding:50px;
+}
+.employee-container{
+    overflow: hidden;
+}
+.employee{
+    border-radius: 10px;
+    width: 100%;
+    color:black;
+    background-color:white;
+    padding:10px;
+    box-shadow: $shadow;
+    .user-img{
+        margin:auto;
+
+        width: 100px;
+        height:100px;
+        background-image: url("../../Uploads/user.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        
+        >img{
+            border-radius: 50px;
+            width: 100px;
+            height: 100px;
+            
+        
+
+        }
+    }
+    .employee-data{
+        text-transform: capitalize;
+        >div{
+            >span{
+                font-weight: bold;
+                padding-right: 10px;
+            }
+        }
+        .name{
+
+        }
+        .role{
+            border-bottom: 1px dashed rgba(0,0,0,0.6);
+        }
+    }
+}
+.eventContainer{
+    color:white;
+    >h3{
+        display:block;
+    }
+    >h2{
+        display:block;
+    }
+    >span{
+        margin-left: 20px;
+        display:block;
+    }
+
+}
+.borrel-setup{
+    top:100px;
+    position: absolute;
+    margin-top:50px;
+    width:100%;
+    padding:10px;
+    text-align: center;
+    margin:auto;
+    color:white;
+    img{
+        margin:auto;
+        margin-top:50px;
+    }
+    h1{
+        font-weight: bold;
+        margin:auto;
+    }
+    h4{
+        margin:auto;
+    }
+    a{
+        margin-top:50px;
+    }
+}
+@media screen and (max-width: 992px) {
+    .feedGrid{
+        display:block !important;
+    }
+  }
+    .newsContainer{
+        margin:auto;
+        .newFeed{
+            margin:auto;
+            .feed{
+
+                >h2{
+                    text-align:left;
+                }
+                .feedGrid{
+                    background-color:white;
+                    box-shadow: $shadow;
+                    margin:  auto;
+                    display:grid;
+                    grid-template-columns: 200px auto;
+                    overflow: hidden;
+
+                    
+                    .qr{
+                        padding:20px;
+                        margin:auto;
+                        >img{
+                            display: block;
+                            position: relative;
+                            margin:auto;
+                            max-width: 200px;
+                            width:100%;
+                        }
+                    }
+                    .text{
+                        
+                        padding:20px;
+                        .title{
+
+                        }
+                        >P{
+                            max-width: 700px;
+                        }
+                        .time{
+                            
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .rooms{
+        user-select: none; 
+        padding:20px;
+        color: white;
+        .roomContainer{
+
+            .time-slider-wrapper{
+                display:flex;
+                .arrow-wrapper{
+                    height:0px;
+                }
+                .arrow{
+                    position: relative;
+                    float:right;
+                    top:-117px;
+                    left:27px;
+                    width:50px;
+                    height:50px;
+                    z-index: 100;
+                    clip-path: polygon(50% 100%, 0 0, 100% 0);
+                    background-color:rgba(255, 0, 0, 0.363);
+                }
+            }
+            .title{
+                text-transform: capitalize;
+                font-size: 3em;
+            }
+            .boxtime{
+                border-bottom: 1px solid white;
+
+                padding:10px;
+                margin:auto;
+                margin-bottom: 10px;
+                margin-left: -16px;
+                margin-right: -27px;
+                display:grid;
+                grid-template-columns:repeat(19,1fr);
+
+                >div{
+                    text-align: left;
+                    width:75%;
+                    height:50px;
+                    >span{
+                        font-size: 1.6em;
+                    }
+                }
+                .arrow{
+                    position: absolute;
+                    z-index: 100;
+                    clip-path: polygon(50% 100%, 0 0, 100% 0);
+                    background-color:rgba(255, 0, 0, 0.363);
+                }
+            }
+            .boxContainer{
+                padding:10px;
+                box-shadow: $shadow;
+                background-color: white;
+                display:grid;
+                grid-template-columns:repeat(18,1fr);
+                margin:auto;
+                .box{
+                    width: 75%;
+                    padding-top:75%;
+                    border: solid 2px white;
+                    margin:auto;
+
+                }
+                .box.green{
+                    background-color: rgb(102, 202, 152);
+                }
+                .box.red{
+                    background-color: rgb(226, 125, 85); 
+                }
+            }
+
+        }
+    }
+

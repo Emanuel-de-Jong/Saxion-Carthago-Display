@@ -1,0 +1,225 @@
+﻿@inject NavigationManager NavManager
+@inject IJSRuntime JSRuntime
+@page "/slides/{Id:int}"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Logging
+@using Microsoft.Extensions.Options
+@using Microsoft.AspNetCore.Hosting
+@using CarthagoDisplay.Pages.NewEmployees
+@using System.IO
+
+@inject IOptions<ConnectionStrings> _options;
+@inject MessageService _messageService;
+@inject IWebHostEnvironment Environment;
+@inject ILogger<Add> Logger;
+
+
+<h1>Slide titel: @_currentSlide.Title</h1>
+
+
+<div style="padding: 20px;">
+
+
+    <ComponentSelector @bind-selectedbox="@_gridPosition" SelectedComponentChanged="ComponentsChanged" Grid="@_grid" Slide="@_currentSlide"></ComponentSelector>
+    <div style="padding: 20px;">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+            Verander grid
+        </button>
+    </div>
+
+
+</div>
+
+
+<div class="slides-containter">
+    <div class="row g-1 mb-3">
+        <div class="col-auto">
+            <label for="primaryColorInput" class="form-label">Primary color picker</label>
+            <input type="color" class="form-control form-control-color" id="primaryColorInput" @bind="_currentSlide.PrimaryColor" title="Choose your color">
+        </div>
+        <div class="col-auto">
+            <label for="secondaryColorInput" class="form-label">Secondary color picker</label>
+            <input type="color" class="form-control form-control-color" id="secondaryColorInput" @bind="_currentSlide.SecondaryColor" title="Choose your color">
+        </div>
+    </div>
+    <div class="row p-3">
+        <label for="slideTitle" class="form-label">Slide titel</label>
+        <input class="form-control mb-2 check-valid" id="slideTitle" placeholder="Slide title" @bind="_currentSlide.Title" required />
+
+        <label for="slideBGImage" class="form-label">Slide achtergrond</label>
+        <small id="slideBGImageHelp" class="form-text text-muted">Huidig achtergrond @_currentSlide.Background</small>
+        <InputFile class="form-control my-2" id="slideBGImage" OnChange="@LoadFiles" accept="image/png, image/gif, image/jpeg" />
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="disabled" @bind="_currentSlide.Disabled">
+            <label class="form-check-label" for="disabled">Uitgeschakeld</label>
+        </div>
+    </div>
+</div>
+
+<button class="btn btn-primary mb-3" @onclick="Save">Opslaan</button>
+
+<div class="modal fade modal-fullscreen" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">Grid selectie</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <div class="modal-body" style="overflow: hidden; padding: 100px;">
+                <GirdSelector @bind-grid="_grid" confirmGrid="ConfirmGrid"></GirdSelector>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private ApplicationDbContext _context;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private Slide _currentSlide;
+    private string _grid;
+    private int _gridPosition;
+    private readonly List<SlideComponent> _slideComponents = new();
+
+
+    private readonly List<IBrowserFile> _loadedFiles = new();
+    private const long maxFileSize = 1024 * 1000 * 5;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _currentSlide = _context.Slides.Include(m => m.SlideComponents).FirstOrDefault(t => t.Id == Id);
+        await _context.DisposeAsync();
+
+        if (_currentSlide != null) _grid = _currentSlide.Grid;
+    }
+
+    private async void Save()
+    {
+        if (string.IsNullOrEmpty(_currentSlide.Title))
+        {
+            await JSRuntime.InvokeVoidAsync("checkValid");
+            return;
+        }
+
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _currentSlide.SlideComponents = null;
+
+        _context.Slides.Update(_currentSlide);
+        await _context.SaveChangesAsync();
+
+        foreach (var slideComponent in _slideComponents)
+        {
+            _context.Components.Update(slideComponent.Component);
+            await _context.SaveChangesAsync();
+
+            var oldslideComponent = _context.SlideComponents.FirstOrDefault(t => t.SlideId == _currentSlide.Id && t.GridPosition == _gridPosition);
+            if (oldslideComponent != null)
+            {
+                _context.SlideComponents.Remove(oldslideComponent);
+                await _context.SaveChangesAsync();
+            }
+
+            _context.SlideComponents.Add(slideComponent);
+            await _context.SaveChangesAsync();
+        }
+
+
+        NavManager.NavigateTo("/");
+    }
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        _loadedFiles.Clear();
+
+        foreach (var file in e.GetMultipleFiles(1))
+        {
+            try
+            {
+                _loadedFiles.Add(file);
+                var trustedFileNameForFileStorage = Path.GetRandomFileName();
+                var path = Path.Combine(Environment.ContentRootPath,
+                    Environment.WebRootPath, "Uploads", "Backgrounds",
+                    trustedFileNameForFileStorage + "-" + file.Name);
+
+                _currentSlide.Background = trustedFileNameForFileStorage + "-" + file.Name;
+
+                await using FileStream fs = new(path, FileMode.Create);
+                await file.OpenReadStream(maxFileSize).CopyToAsync(fs);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("File: {Filename} Error: {Error}",
+                    file.Name, ex.Message);
+            }
+        }
+    }
+
+    private async void ConfirmGrid()
+    {
+        _currentSlide.Grid = _grid;
+
+        await JSRuntime.InvokeVoidAsync("CreateDivsForPreview");
+
+        if (!string.IsNullOrEmpty(_grid))
+        {
+            var grids = _grid.Split("//");
+
+            for (var i = 0; i < grids.Length; i++)
+            {
+                await JSRuntime.InvokeVoidAsync("createGrid", i + 1, grids[i], true);
+            }
+            await JSRuntime.InvokeVoidAsync("removeBoxes");
+        }
+        StateHasChanged();
+    }
+
+    private void ComponentsChanged(Component component)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        var oldSlideComponent = _slideComponents.FirstOrDefault(c => c.GridPosition == _gridPosition);
+        if (oldSlideComponent != null)
+        {
+            _slideComponents.Remove(oldSlideComponent);
+        }
+
+
+        var slideComponent = new SlideComponent
+            {
+                SlideId = _currentSlide.Id,
+                Component = component,
+                GridPosition = _gridPosition
+            };
+        _slideComponents.Add(slideComponent);
+
+        _currentSlide.SlideComponents = _slideComponents;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (string.IsNullOrEmpty(_currentSlide.Grid))
+            {
+                await JSRuntime.InvokeVoidAsync("ForceCreateGrid");
+            }
+        }
+    }
+
+}

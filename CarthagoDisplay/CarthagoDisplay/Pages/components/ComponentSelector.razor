@@ -1,0 +1,243 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@inject IJSRuntime JSRuntime
+@inject IOptions<ConnectionStrings> _options;
+
+
+<div class="ComponentSelector-Container">
+    <div class="container-3" id="component-container">
+    </div>
+    <div class="component-settings">
+        <div>
+            @if (selectedbox == 0)
+            {
+                <h4>Please Select a box</h4>
+            }
+            else
+            {
+                <h3>Box: @selectedbox</h3>
+                <div class="row form-group">
+                    <div class="col">
+                        <select class="form-control" @onchange="ComponentTypeChange">
+                            @if (SelectedComponent == null)
+                            {
+                                <option value="" disabled selected>Selecteer een component</option>
+                            }
+
+                            @foreach (var component in components)
+                            {
+                                if (SelectedComponent != null)
+                                {
+                                    if (SelectedComponent.Id == component.Id)
+                                    {
+                                        <option value="@component.Id" selected>@component.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@component.Id">@component.Name</option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="@component.Id">@component.Name</option>
+                                }
+                            }
+                            <option value="newRSSFeed">Nieuwe RSS feed</option>
+                            <option value="newCustom">Nieuwe custom component</option>
+                        </select>
+                    </div>
+
+
+                    @if (SelectedComponent != null)
+                    {
+                        @switch (SelectedComponent.ComponentType)
+                        {
+                            case ComponentType.RSSFeed:
+                                <div class="row form-group">
+                                    <div class="col">
+                                        <input class="form-control check-valid" placeholder="Component Name" @bind="SelectedComponent.Name" required/>
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col">
+                                        <input class="form-control" placeholder="RSS Feed URL" @bind="SelectedComponent.Url"/>
+                                    </div>
+                                </div>
+
+                                break;
+
+                            case ComponentType.Custom:
+                                <div class="row form-group">
+                                    <div class="col">
+                                        <input class="form-control check-valid" placeholder="Component Name" @bind="SelectedComponent.Name" required/>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editerModal">Edit</button>
+                                <div class="modal fade modal-fullscreen" id="editerModal">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Edit Component</h4>
+                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            </div>
+
+                                            <div class="modal-body" style="overflow: hidden; padding: 100px;">
+                                                @if (SelectedComponent.Html == null)
+                                                {
+                                                    SelectedComponent.Html = "";
+                                                }
+                                                <EditorComponent EditorValue="@SelectedComponent.Html" EditorValueChanged="EditorChanged"></EditorComponent>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                break;
+                        }
+                    }
+                    <div class="button-container">
+                        <button class="btn btn-primary mb-3 my-auto" data-dismiss="modal" @onclick="AddComponent">Add Component</button>
+                    </div>
+
+                </div>
+            }
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+@code {
+
+    [Parameter]
+    public string Grid { get; set; }
+
+    [Parameter]
+    public Slide Slide { get; set; }
+
+    private ApplicationDbContext _context;
+
+    [Parameter]
+    public EventCallback<Component> SelectedComponentChanged { get; set; }
+
+    [Parameter]
+    public Component SelectedComponent { get; set; }
+
+
+    [Parameter]
+    public EventCallback<int> SelectedboxChanged { get; set; }
+
+    [Parameter]
+    public int selectedbox { get; set; }
+
+
+    private List<Component> components;
+
+
+    protected override Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        components = _context.Components.ToList();
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("setdotNetReference", DotNetObjectReference.Create(this));
+
+            await JSRuntime.InvokeVoidAsync("CreateDivsForPreview");
+
+            if (!string.IsNullOrEmpty(Grid))
+            {
+                var grids = Grid.Split("//");
+
+                for (var i = 0; i < grids.Length; i++)
+                {
+                    await JSRuntime.InvokeVoidAsync("createGrid", i + 1, grids[i], true);
+                }
+                await JSRuntime.InvokeVoidAsync("removeBoxes");
+            }
+        }
+    }
+
+    private void ComponentTypeChange(ChangeEventArgs e)
+    {
+        if (e.Value.ToString() == "newRSSFeed")
+        {
+            SelectedComponent = new Component
+            {
+                ComponentType = ComponentType.RSSFeed
+            };
+        }
+        else if (e.Value.ToString() == "newCustom")
+        {
+            SelectedComponent = new Component
+            {
+                ComponentType = ComponentType.Custom
+            };
+        }
+        else
+        {
+            SelectedComponent = components.FirstOrDefault(t => t.Id == int.Parse(e.Value.ToString()));
+        }
+    }
+
+    [JSInvokable]
+    public async Task SelectBox(int data)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        var oldComopnent = _context.SlideComponents.FirstOrDefault(t => t.SlideId == Slide.Id && t.GridPosition == data);
+
+        if (oldComopnent != null)
+        {
+            var comopnentID = oldComopnent.ComponentId;
+            SelectedComponent = _context.Components.FirstOrDefault(t => t.Id == comopnentID);
+        }
+        else
+        {
+            SelectedComponent = null;
+        }
+
+        selectedbox = data;
+        await SelectedboxChanged.InvokeAsync(selectedbox);
+
+        StateHasChanged();
+    }
+
+
+    private async void AddComponent()
+    {
+        if (string.IsNullOrEmpty(SelectedComponent.Name))
+        {
+            await JSRuntime.InvokeVoidAsync("checkValid");
+            return;
+        }
+
+        await SelectedComponentChanged.InvokeAsync(SelectedComponent);
+        SelectedComponent = null;
+        selectedbox = 0;
+    }
+
+    private void EditorChanged(string html)
+    {
+        SelectedComponent.Html = html;
+    }
+
+}

@@ -1,0 +1,81 @@
+﻿@page "/Settings"
+
+<h3>Instellingen</h3>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        @if (_menu == 0)
+        {
+            <div class="nav-link active" aria-current="page">Algemene instellingen</div>
+        }
+        else
+        {
+            <div class="carthago-green nav-link" aria-current="page" @onclick="() => SetMenu(0)">Algemene instellingen</div>
+        }
+
+    </li>
+
+    <li class="nav-item">
+        @if (_menu == 1)
+        {
+            <div class="nav-link active" aria-current="page">Outlook API</div>
+        }
+        else
+        {
+            <div class="carthago-green nav-link" aria-current="page" @onclick="() => SetMenu(1)">Outlook API</div>
+        }
+
+    </li>
+
+    <li class="nav-item">
+        @if (_menu == 2)
+        {
+            <div class="nav-link active" aria-current="page">Event API</div>
+        }
+        else
+        {
+            <div class="carthago-green nav-link" aria-current="page" @onclick="() => SetMenu(2)">Event API</div>
+        }
+
+    </li>
+    <li class="nav-item">
+        @if (_menu == 3)
+        {
+            <div class="nav-link active" aria-current="page">Spotify API</div>
+        }
+        else
+        {
+            <div class="carthago-green nav-link" aria-current="page" @onclick="() => SetMenu(3)">Spotify API</div>
+        }
+
+    </li>
+
+</ul>
+<div style="padding: 20px;">
+    @switch (_menu)
+    {
+        case 0:
+            <MainSettings></MainSettings>
+            break;
+        case 1:
+            <OutlookSettings></OutlookSettings>
+            break;
+        case 2:
+            <EventsSettings></EventsSettings>
+            break;
+        case 3:
+            <SpotifySettings></SpotifySettings>
+            break;
+    }
+</div>
+
+
+@code {
+    private int _menu;
+
+    private void SetMenu(int option)
+    {
+        _menu = option;
+        StateHasChanged();
+    }
+
+}

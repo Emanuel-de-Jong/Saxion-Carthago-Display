@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  carthagodisplay:
+    depends_on:
+      - database
+    build: ../CarthagoDisplay
+    container_name: Display
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    networks:
+      - app-network
+    
+  
+  database:
+    build: ./database
+    ports:
+      - '3306:3306'
+    restart: unless-stopped
+    container_name: database
+    networks:
+      - app-network
+    volumes:
+      - mysqlvolume:/var/lib/mysql
+
+networks:
+  app-network:
+    driver: bridge  
+
+volumes:
+  mysqlvolume:

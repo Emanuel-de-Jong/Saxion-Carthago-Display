@@ -1,0 +1,99 @@
+﻿@inject IJSRuntime JSRuntime
+
+@inject MessageService _messageService;
+@inject IOptions<ConnectionStrings> _options;
+@page "/components/rooms"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+
+
+
+@if (_rooms != null)
+{
+    foreach (var room in _rooms)
+    {
+        <div class="rooms">
+            <div class="roomContainer">
+                <span class="title">@room.Name</span>
+                <div class="boxtime"></div>
+                <div class="boxContainer">
+                    @foreach (var value in room.AvailabilityView)
+                    {
+                        if (value == '0')
+                        {
+                            <div class="box green">
+                            </div>
+                        }
+                        else if (value == '2')
+                        {
+                            <div class="box red">
+                            </div>
+                        }
+                    }
+
+                </div>
+                <div class="time-slider-wrapper">
+
+                    <div class="time-slider">
+                        <div class="arrow-wrapper">
+                            <div class="arrow"></div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private List<Room> _rooms;
+    private ApplicationDbContext _context;
+    private DateTime _lastUpdate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _rooms = await _context.Rooms.ToListAsync();
+        _lastUpdate = DateTime.Now;
+
+        await _context.DisposeAsync();
+        _messageService.OnMessage += MessageHandler;
+    }
+
+    private async void MessageHandler(string message)
+    {
+        if (message == "Update_Rooms")
+        {
+            await InvokeAsync(async () =>
+            {
+                var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+                optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+                _context = new ApplicationDbContext(optionsBuilder.Options);
+
+                _rooms = await _context.Rooms.ToListAsync();
+                _lastUpdate = DateTime.Now;
+                await _context.DisposeAsync();
+                StateHasChanged();
+            });
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("createTimeLabels");
+        }
+    }
+
+
+
+}

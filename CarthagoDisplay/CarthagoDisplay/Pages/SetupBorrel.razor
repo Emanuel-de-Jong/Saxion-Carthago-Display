@@ -1,0 +1,67 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using QRCoder
+@using Blazored.SessionStorage
+@inject ISessionStorageService sessionStorage;
+@inject IOptions<ConnectionStrings> _options;
+@inject NavigationManager MyNavigationManager
+
+<div class="borrel-setup">
+    <h1>HET IS BIJNA BORREL TIJD!</h1>
+    <h4>Scan de QR code op de party te beginnen!!!</h4>
+    @if (_qrCode != null)
+    {
+        <a href="@_url" target="_blank">
+            <img style="max-width: 200px;" src="@($"data:image/png;base64,{_qrCode}")"/>
+        </a>
+    }
+
+</div>
+
+<div class="bg">
+    <div class="left"></div>
+    <div class="right"></div>
+</div>
+
+
+@code {
+    private ApplicationDbContext _context;
+    private SpotifyApiSettings _spotifyApiSettings;
+    private string _qrCode;
+    private string _url;
+    private string _state = Guid.NewGuid().ToString();
+    private string _callbackurl;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _callbackurl = MyNavigationManager.BaseUri + "api/spotify/callback";
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseMySql(_options.Value.DefaultConnection, ServerVersion.AutoDetect(_options.Value.DefaultConnection));
+
+        _context = new ApplicationDbContext(optionsBuilder.Options);
+
+        _spotifyApiSettings = await _context.SpotifyApiSettings.FindAsync(1);
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _url = $"https://accounts.spotify.com/authorize?client_id={_spotifyApiSettings.ClientID}&response_type=code&redirect_uri={_callbackurl}&scope=playlist-modify-public%20playlist-modify-private&state={_state}";
+            _qrCode = GetQrCode(_url);
+            StateHasChanged();
+        }
+        return Task.CompletedTask;
+    }
+
+
+    private string GetQrCode(string url)
+    {
+        var qrGenerator = new QRCodeGenerator();
+        var qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
+        var qrCode = new Base64QRCode(qrCodeData);
+        return qrCode.GetGraphic(20);
+    }
+
+}
