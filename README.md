@@ -8,7 +8,9 @@ Carthago display is a customizable TV information system build for Carthago ICT.
 
 | | |
 | :---: | :---: |
-| ![](/Screenshots/.png) | ![](/Screenshots/.png) |
+| ![](/Screenshots/1-Slideshow.png) | ![](/Screenshots/2-Settings.png) |
+| ![](/Screenshots/3-Slides.png) | ![](/Screenshots/4-Grid_Setting.png) |
+| ![](/Screenshots/5-Slide_Settings.png) | ![](/Screenshots/.png) |
 
 ### Features
 - Show meeting room occupancy
