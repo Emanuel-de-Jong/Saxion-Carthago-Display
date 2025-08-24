@@ -3,6 +3,13 @@ For the class: 2.1 Project Persistent
 
 Carthago display is a customizable TV information system build for Carthago ICT.
 
+**Active Development:** <br>
+**Last Change:** <br>
+
+| | |
+| :---: | :---: |
+| ![](/Screenshots/.png) | ![](/Screenshots/.png) |
+
 ### Features
 - Show meeting room occupancy
 - Show upcoming events
@@ -19,7 +26,6 @@ Carthago display is a customizable TV information system build for Carthago ICT.
 
 - Slide Time: This is the time (In seconds) between slides.
 - Host URL: This must be the current URL (Example: http://192.168.1.1:8080)
-
 
 </details>
 <details><summary>2. Insert the Outlook API settings</summary>
@@ -66,24 +72,23 @@ For the Playlist name you can insert a fun name (This name will be used for the 
 <details><summary>Production</summary>
 In the current configuration, Carthago display is made to run on a RPI (Raspberry pi) running Raspbian.
 
-1. Install Docker and Docker-compose on the RPI (https://dev.to/elalemanyo/how-to-install-docker-and-docker-compose-on-raspberry-pi-1mo)
-2. Clone the project Repo
-3. CD to the project direcotry
-4. Run the following commands:
-`cd Docker && sudo docker-compose up --build -d` (This can take a long time)
-5. Now you can connect to the Database using a MySQL client and run the SQL file found in the [Project root]/Database
+1. Install Docker and Docker-compose on the RPI (https://dev.to/elalemanyo/how-to-install-docker-and-docker-compose-on-raspberry-pi-1mo).
+2. Clone the project Repo.
+3. CD to the project direcotry.
+4. Run the command: `cd Docker && sudo docker-compose up --build -d` (This can take a long time).
+5. Now you can connect to the Database using a MySQL client and run the SQL file found in the `[Project root]/Database`.
 6. After this the application should be running and be accessible by inserting the IP of the RPI in the browser.
 
 </details>
 
 <details><summary>Development</summary>
 
-1. Clone the project repo
-2. Run the following command (Assuming you already installed docker): `docker volume create carthago_mysql && docker run --name Carthago-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=CarthagoDB -v carthago_mysql:/var/lib/mysql -p 3306:3306 -d mysql:5.7`
+1. Clone the project repo.
+2. Run the following command (Assuming you already installed docker): `docker volume create carthago_mysql && docker run --name Carthago-mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=CarthagoDB -v carthago_mysql:/var/lib/mysql -p 3306:3306 -d mysql:5.7`.
 3. Open the solution in visual studio.
 4. Create the database by running the following commands in the package manager console (Tools > NuGet Package Manager > Package Manager Console):
-    `Add-Migration Init`
-    `Update-Database`
+    - `Add-Migration Init`
+    - `Update-Database`
 5. Now you can start developing.
 
 </details>
