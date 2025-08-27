@@ -3,8 +3,8 @@ For the class: 2.1 Project Persistent
 
 Carthago display is a customizable TV information system build for Carthago ICT.
 
-**Active Development:** <br>
-**Last Change:** <br>
+**Active Development:** 2021-08-30 - 2021-09-24<br>
+**Last Change:** 2021-09-24<br>
 
 | | |
 | :---: | :---: |
