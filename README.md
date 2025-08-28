@@ -96,3 +96,4 @@ In the current configuration, Carthago display is made to run on a RPI (Raspberr
 </details>
 
 </details>
+ 
